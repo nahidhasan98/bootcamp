@@ -7,8 +7,8 @@ import (
 
 func main() {
 
-	//conn, err := net.Dial("tcp", "localhost:8888")
-	conn, err := net.Dial("tcp", "91.205.173.170")
+	conn, err := net.Dial("tcp", "localhost:8888")
+	//conn, err := net.Dial("tcp", "91.205.173.170")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
