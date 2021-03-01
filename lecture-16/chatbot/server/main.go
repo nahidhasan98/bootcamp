@@ -62,7 +62,9 @@ func displayMsg(msg string, size int) {
 func prepareResponse(msg string, size int) string {
 	var response string
 
-	if strings.ToLower(msg) == "date" {
+	if strings.ToLower(msg) == "hi" || strings.ToLower(msg) == "hello" {
+		response = "Hello there! :)"
+	} else if strings.ToLower(msg) == "date" {
 		year := time.Now().Year()
 		month := time.Now().Month()
 		day := time.Now().Day()
@@ -72,8 +74,8 @@ func prepareResponse(msg string, size int) string {
 	} else if strings.ToLower(msg) == "time" {
 		response = time.Now().Format(time.Kitchen)
 	} else {
-		resp, err := strconv.Atoi(msg)
-		checkErr(err)
+		resp, _ := strconv.Atoi(msg)
+		//checkErr(err)
 
 		if msg != "0" && resp == 0 {
 			response = "Sorry, I can't understand what you are saying. :("
