@@ -20,9 +20,7 @@ func init() {
 	db, err = sql.Open("mysql", "root:bootcamp@tcp(127.0.0.1:3306)/hosting_db")
 
 	// if there is an error opening the connection, handle it
-	if err != nil {
-		panic(err.Error())
-	}
+	checkErr(err)
 
 	// defer the close till after the main function has finished
 	// executing
