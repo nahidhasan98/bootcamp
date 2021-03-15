@@ -2,16 +2,21 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"text/template"
 	"time"
 
 	"github.com/couchbase/gocb/v2"
 )
 
-var collection *gocb.Collection
+var (
+	db  *gocb.Cluster
+	err error
+)
 
 func init() {
 	// //couchbase connection block
-	cluster, err := gocb.Connect(
+	db, err = gocb.Connect(
 		"localhost",
 		gocb.ClusterOptions{
 			Username: "root",
@@ -19,67 +24,79 @@ func init() {
 		})
 	checkErr(err)
 
-	// get a bucket reference
-	bucket := cluster.Bucket("bootcamp")
-
 	// We wait until the bucket is definitely connected and setup.
-	err = bucket.WaitUntilReady(5*time.Second, nil)
-	checkErr(err)
-
-	// get a collection reference
-	collection = bucket.DefaultCollection()
-
-	// for a named collection and scope
-	// scope := bucket.Scope("my-scope")
-	// collection := scope.Collection("my-collection")
-}
-
-type RequestTable struct {
-	ID      string `json:"aid"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Company string `json:"company"`
-	Type    string `json:"type"`
-	Status  int    `json:"status"`
+	err = db.WaitUntilReady(5*time.Second, nil)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Database connection established successfully.")
 }
 
 func main() {
-	// Upsert Document Start //
+	//serving perspective request
+	http.HandleFunc("/", home)
+	http.HandleFunc("/request", request)
+	http.HandleFunc("/features", features)
+	http.HandleFunc("/docs", docs)
 
-	//using map data
-	// upsertData := map[string]string{
-	// 	"name":    "Nahid",
-	// 	"company": "Master Academy",
-	// 	"email":   "mnh.nahid35@gmail.com",
-	// }
+	//serving file from server to client
+	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("../assets"))))
 
-	//using struct data
-	// var upsertData RequestTable
-	// upsertData.Name = "Nahid"
-	// upsertData.Company = "Master Academy"
-	// upsertData.Email = "mnh.nahid35@gmail.com"
-	// upsertData.Type = "request"
-	// upsertData.Status = 1
-
-	//using struct literal
-	upsertData := RequestTable{
-		ID:      "request::3",
-		Name:    "Nahid",
-		Company: "Master Academy",
-		Email:   "mnh.nahid35@gmail.com",
-		Type:    "request",
-		Status:  1,
-	}
-
-	upsertResult, err := collection.Upsert("request::3", upsertData, &gocb.UpsertOptions{})
-	checkErr(err)
-
-	fmt.Println(upsertResult.Cas())
-	// Upsert Document End //
+	//localhost running on port 8888
+	http.ListenAndServe(":8888", nil)
 }
 
 func checkErr(err error) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+}
+
+func home(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("../template/base.gohtml")
+	checkErr(err)
+
+	tmpl.Execute(w, nil)
+}
+
+func features(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("../template/base.gohtml")
+	checkErr(err)
+
+	tmpl, err = tmpl.ParseFiles("../wpage/features.gohtml")
+	checkErr(err)
+
+	tmpl.Execute(w, nil)
+}
+
+func docs(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("../template/base.gohtml")
+	checkErr(err)
+
+	tmpl, err = tmpl.ParseFiles("../wpage/docs.gohtml")
+	checkErr(err)
+
+	// tmpl, err = tmpl.ParseFiles("wpage/test.gohtml")
+	// checkErr(err)
+
+	tmpl.Execute(w, nil)
+}
+
+func request(w http.ResponseWriter, r *http.Request) {
+	//gettint form data
+	name := r.FormValue("name")
+	company := r.FormValue("company")
+	email := r.FormValue("email")
+
+	//Insert Document Start //
+	q := `INSERT INTO bootcamp (KEY, VALUE) VALUES ( "request::3", { "aid": "%s", "name": "%s", "company": "%s", "email": "%s", "type": "%s", "status": %d })`
+	query := fmt.Sprintf(q, "request::3", name, company, email, "request", 1)
+
+	_, err := db.Query(query, &gocb.QueryOptions{})
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Data inserted successfully.")
+	}
+	// Insert Document End //
 }
