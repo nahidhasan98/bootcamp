@@ -1,2 +1,4 @@
 #all exe file
 *.exe
+
+/mcb

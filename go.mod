@@ -7,7 +7,7 @@ require (
 	github.com/couchbase/gocb/v2 v2.2.1
 	github.com/elliotchance/orderedmap v1.4.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/mateors/mcb v0.0.0-20201207015423-f79fcbf435d1
+	github.com/mateors/mcb v0.0.0-20201207015423-f79fcbf435d1 // indirect
 	github.com/mateors/money v0.0.0-20200823090156-43894c563246 // indirect
 	github.com/mateors/mtool v0.0.0-20201108041646-15a7a25c244e // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
