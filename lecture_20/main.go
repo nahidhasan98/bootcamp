@@ -142,7 +142,7 @@ func request(w http.ResponseWriter, r *http.Request) {
 
 	var reqTable RequestTable
 
-	r.Form.Add("bucket", "bootcamp")
+	r.Form.Add("bucket", "master_academy")
 	r.Form.Add("aid", "request::2") //we will update later
 	r.Form.Add("type", "request")
 	r.Form.Add("status", "1")
